@@ -1,0 +1,26 @@
+name: BedwarsX
+version: 0.1.0-dev
+description: 高版本的起床战争
+api-version: 1.18
+author: JerryZRF
+main: cf.jerryzrf.bedwarsx.BedwarsX
+depend:
+  - PlaceholderAPI
+commands:
+  bwx:
+    description: 主命令
+    permission: bwx.admin
+    permission-message: "你没有权限这么做!"
+    usage: "/bwx"
+permissions:
+  bwx.admin:
+    description: 管理员
+    default: op
+    children:
+      bwx.start: true
+  bwx.start:
+    description: 开启游戏
+    default: false
+  bwx.player:
+    description: 普通玩家
+    default: true

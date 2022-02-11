@@ -1,0 +1,105 @@
+# 颜色及样式表
+# 来自 https://plgdev.xuogroup.top/#/AC-1-3 作者 RarityEG
+# 使用 & 代替 § 指定样式
+# &0 黑色
+# &1 深蓝
+# &2 深绿
+# &3 湖蓝
+# &4 深红
+# &5 紫色
+# &6 金色
+# &7 灰色
+# &8 深灰
+# &9 蓝色
+# &a 绿色
+# &b 天蓝
+# &c 红色
+# &d 粉红
+# &e 黄色
+# &f 白色
+# &k 乱码字符
+# &l 加粗
+# &m 划掉
+# &n 下划线
+# &o 斜体
+# &r 全部重置
+# 设置的样式能够应用到接着这些消息后的文字，例如 audit-uuid，请小心使用！
+# 颜色代码必须在格式代码之前，并且修改颜色时必须再写一遍格式代码！！！
+version: 0
+#前缀
+prefix: "[BedwarsX]"
+#游戏开始
+startTitle0: "&3游戏开始"
+startTitle1: "&6摧毁敌方的床"
+#倒计时暂停
+cdStopTitle0: "倒计时暂停"
+cdStopTitle1: "%bwx_player% / %bwx_max_player%"
+#倒计时缩减
+cdCutTitle0: "倒计时缩减"
+cdCutTitle1: "5s后开始游戏"
+#倒计时
+cdTitle0: "%bwx_cut_down%"
+cdTitle1: "%bwx_player% / %bwx_max_player%"
+#游戏结束后
+kick: "5秒后退出"
+#没有权限
+noPerm: "&4你没有权限这么做!"
+#床被破坏
+# {player} 挖床者
+# {team} 队伍
+# {team_color} 被挖床队伍的颜色
+# {player_color} 挖床者队伍的颜色
+breakBed:
+  self:
+    title0: "&k_&r{color}你家炸了&r&k_"
+    title1: "快去谢谢{player_color}{player}&r吧"
+    message: "&e终于没了后患之忧~"
+  others:
+    title0: "&k_&r{team_color}{team}炸了&r&k_"
+    title1: "挖床者:{player_color}{player}"
+    message: "见到{team_color}{team}&r的玩家就勇敢地直接上吧~"
+#找不到队伍
+noTeam: "&c不存在指定队伍"
+#玩家尝试睡觉
+sleep: "&c睡你MD起来嗨"
+#恢复床时仍有床
+haveBed: "&c有床还恢复NM"
+#已经恢复过一次了
+usedRestore: "&c机会只有一次哦~"
+#挖自己的床
+brokeSelf: "&c自己的床挖NM呢"
+#使用恢复床
+# {player} 玩家显示名
+# {team} 队伍名
+# {color} 队伍颜色
+useRestore:
+  self:
+    title0: "&a床已恢复"
+    title1: "&a又可以放心浪了~"
+    message: "&k_&r队友{team_color}{player}&r&a使用了&r&6恢复床&k_"
+  others:
+    title0: "&k_&r{team_color}{team}&r&a的床已恢复&r&k_"
+    title1: "&e快去在拆一次他们家吧~"
+    message: "&k_&r玩家{team_color}{player}&r&6使用了&r&6恢复床&k_"
+#玩家死亡
+# {player} 死者
+# {player_team} 死者队伍名
+# {player_color} 死者队伍颜色
+# {killer} 击杀者
+# {killer_team} 队伍名
+# {killer_color} 击杀者队伍颜色
+playerDie:
+  first: "&6&k_&r&5第一滴血!&r {player_color}{player}&c开局就给&r{killer_color}{killer}&c送了份快递&r&6&k_" #第一滴血
+  last: "&6&k_&r&5最终击杀!&r {player_color}{player}&c被&r{killer_color}{killer}&c摁在地上摩擦&r&6&k_"     #最终击杀
+  normal:  #普通(随机抽取)
+#等待复活
+# {time} 剩余时间
+# {color} 队伍颜色
+respawningTitle0: "&k_&r &6{time} &r&k_"
+respawningTitle1: "{color}复活后又是一条好汉"
+#复活后
+# {color} 队伍颜色
+respawnTitle0: "&k_&r &6你复活了 &r&k_"
+respawnTitle1: "{color}Go Go Go!"
+#无敌时间
+noHurt: "&6无敌时间"

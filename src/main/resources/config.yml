@@ -1,0 +1,86 @@
+version: 0
+#允许在编辑地图时方块发射改变(如着火、融化等)
+allowBlockChangeInEditing: false
+#BungeeCord中的大厅名
+lobby: Lobby
+#游戏世界名
+world: world
+#旁观者
+watcher:
+  #队伍名称(说话时)
+  name: "旁观者"
+  #允许和游戏中玩家交流
+  chat: false
+  #初始位置(一般地图中央)
+  loc:
+    x: 0
+    y: 120
+    z: 0
+#聊天格式
+chatInGame: "%s %s"
+#最大玩家
+maxPlayer: 16
+#公平模式(人数为队伍数的倍数)
+fair: false
+#倒计时
+countdown:
+  default: 120  #初始
+  cut: 5   #缩减
+team:
+  - name: "红队"  #名称
+    color: RED   #颜色
+    spawn:       #出生点
+      x: 0.0
+      y: 120.0
+      z: 0.0
+    bed:
+      x: 1.0
+      y: 120.0
+      z: 1.0
+  - name: "蓝队"
+    color: BLUE
+    spawn:
+      x: 0.0
+      y: 120.0
+      z: 0.0
+    bed:
+      x: -1.0
+      y: 120.0
+      z: -1.0
+#地图设置
+map:
+  #边界1
+  start:
+    x: -10.0
+    y: 0.0
+    z: -10.0
+  #边界2
+  end:
+    x: 10.0
+    y: 0.0
+    z: 10.0
+  #大厅
+  lobby:
+    x: 0.0
+    y: 120.0
+    z: 0.0
+#使用经验模式
+exp_enable: true
+resource:
+  - name: "铁"  #显示名
+    material: IRON_INGOT  #资源类型
+    time: 15  #生成间隔(1s = 20ticks)
+    lore:  #lore
+      - "普通的铁~"
+      - "一切的基础 ——放屁"
+    exp: 1  #经验
+    loc:
+      - x: 0.0
+        y: 120.0
+        z: 0.0
+#复活
+respawn:
+  #复活时间(1s = 20ticks)
+  time: 100
+  #无敌时间
+  noHurt: 5
