@@ -20,7 +20,7 @@ import static cf.jerryzrf.bedwarsx.Config.config;
 import static cf.jerryzrf.bedwarsx.Config.message;
 import static cf.jerryzrf.bedwarsx.Utils.apply;
 
-
+@SuppressWarnings("deprecation")
 public final class Game {
     public static GameStatus status = GameStatus.Waiting;
     public static final World world = Bukkit.getWorld(config.getString("world", "world"));
@@ -56,11 +56,14 @@ public final class Game {
             players.put(player.getUniqueId(), team);
         });  //智障算法
         //游戏开始
-        inGamePlayers.forEach(player -> player.showTitle(Title.title(
-                        Component.text(apply(player, message.getString("startTitle0", "游戏开始"))),
-                        Component.text(apply(player, message.getString("startTitle1", "摧毁敌方的床")))
-                ))
-        );
+        inGamePlayers.forEach(player -> {
+            player.showTitle(Title.title(
+                    Component.text(apply(player, message.getString("startTitle0", "游戏开始"))),
+                    Component.text(apply(player, message.getString("startTitle1", "摧毁敌方的床")))
+            ));
+            player.teleport(players.get(player.getUniqueId()).spawn);
+            player.setGameMode(GameMode.SURVIVAL);
+        });
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -72,20 +75,24 @@ public final class Game {
 
     public static void end(TeamManager.Team winner) {
         changeStatus(GameStatus.Ending);
-        ResourceManager.end();
-        BlockManager.reset();
-        TeamManager.reset();
+        reset();
         init();
     }
 
     public static void init() {
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
         Bukkit.getOnlinePlayers().forEach(player -> player.kick(Component.text("服务器重置")));
-        players.clear();
-        inGamePlayers.clear();
         changeStatus(GameStatus.Waiting);
         countdown = Config.config.getInt("countdown.default");
         countDown();
+    }
+
+    public static void reset() {
+        players.clear();
+        inGamePlayers.clear();
+        ResourceManager.stop();
+        BlockManager.reset();
+        TeamManager.reset();
     }
 
     public static void changeStatus(GameStatus s) {
@@ -101,7 +108,7 @@ public final class Game {
     public static void playerDie(Player player) {
         player.setGameMode(GameMode.SPECTATOR);  //旁观模式
         player.teleport(center);
-        if (players.get(player.getUniqueId()).isBed) {
+        if (!players.get(player.getUniqueId()).isBed) {
             players.put(player.getUniqueId(), watcher);
             player.setInvisible(true);
             inGamePlayers.remove(player);
@@ -127,6 +134,12 @@ public final class Game {
                             e.printStackTrace();
                         }
                     }
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            player.setGameMode(GameMode.SURVIVAL);
+                        }
+                    }.runTask(plugin);
                     noHurtTime.put(player.getUniqueId(), (new Date()).getTime());
                     player.clearTitle();
                     player.showTitle(Title.title(
@@ -185,7 +198,12 @@ public final class Game {
                     }
                 }
                 if (countdown <= 0) {
-                    Game.start();
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            Game.start();
+                        }
+                    }.runTask(plugin);
                     cdTask.cancel();
                 }
             }

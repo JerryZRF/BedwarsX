@@ -63,6 +63,7 @@ public final class Commander implements TabExecutor {
                     sender.sendMessage(message.getString("noPerm", "你没有权限这么做!"));
                     return true;
                 }
+                Game.reset();
                 sender.sendMessage("进入编辑模式");
                 Game.changeStatus(GameStatus.Editing);
                 return true;

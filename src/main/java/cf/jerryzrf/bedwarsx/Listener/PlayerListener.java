@@ -49,11 +49,16 @@ public final class PlayerListener implements Listener {
                 player.kick(Component.text("服务器正在施工，请稍后再试..."));
             }
         }
+        player.clearTitle();
+        player.setGameMode(GameMode.ADVENTURE);
+        player.setInvisible(false);
     }
     @EventHandler
     public void PlayerQuit(PlayerQuitEvent event) {
+        if (Game.status == GameStatus.Editing) {
+            return;
+        }
         Player player = event.getPlayer();
-
         Game.inGamePlayers.remove(player);
         Game.players.remove(player.getUniqueId());
         if (Game.status == GameStatus.Running) {
@@ -108,14 +113,16 @@ public final class PlayerListener implements Listener {
         }
         Player player = event.getEntity();
         if (player.getLastDamageCause() == null) {
-            return;
+            Game.playerDie(player);
         }
+        EntityDamageEvent.DamageCause cause = player.getLastDamageCause().getCause();
         Entity entity = player.getLastDamageCause().getEntity();
         Player killer;
         if (entity instanceof Player) {
             killer = (Player) entity;
         } else {
             if ((Game.animals.get(entity) == null)) {
+                Game.playerDie(player);
                 return;
             }
             killer = Bukkit.getPlayer(Game.animals.get(entity));

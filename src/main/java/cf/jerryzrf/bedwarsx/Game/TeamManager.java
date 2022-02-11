@@ -5,6 +5,7 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -31,7 +32,6 @@ public final class TeamManager {
                         (double) ((Map<?, ?>) team.get("spawn")).get("x"),
                         (double) ((Map<?, ?>) team.get("spawn")).get("y"),
                         (double) ((Map<?, ?>) team.get("spawn")).get("z"))
-
         )));
     }
 
@@ -62,7 +62,7 @@ public final class TeamManager {
         });
     }
     public static void reset() {
-        teams.forEach(team -> team.bed.setType(team.bed.getType()));
+        teams.forEach(Team::reset);
     }
 
     public enum TeamColor {
@@ -95,20 +95,28 @@ public final class TeamManager {
         public final String name;
         public final TeamColor color;
         public final Block bed;
+        public final Material bedType;
         public final Location spawn;
         public boolean isBed = true;
         public boolean useRestore = false;
-
 
         public Team(String name, TeamColor color, Location bed, Location spawn) {
             this.name = name;
             this.color = color;
             if (bed != null) {
                 this.bed = Bukkit.getWorld(config.getString("world", "world")).getBlockAt(bed);
+                bedType = this.bed.getType();
             } else {
                 this.bed = null;
+                bedType = null;
             }
             this.spawn = spawn;
+        }
+
+        public void reset() {
+            isBed = true;
+            useRestore = false;
+            bed.setType(bedType);
         }
 
         public void bedBroken(Player player) {

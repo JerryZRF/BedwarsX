@@ -30,9 +30,9 @@ team:
   - name: "红队"  #名称
     color: RED   #颜色
     spawn:       #出生点
-      x: 0.0
+      x: 1.0
       y: 120.0
-      z: 0.0
+      z: 1.0
     bed:
       x: 1.0
       y: 120.0
@@ -40,9 +40,9 @@ team:
   - name: "蓝队"
     color: BLUE
     spawn:
-      x: 0.0
+      x: -1.0
       y: 120.0
-      z: 0.0
+      z: -1.0
     bed:
       x: -1.0
       y: 120.0
@@ -80,7 +80,7 @@ resource:
         z: 0.0
 #复活
 respawn:
-  #复活时间(1s = 20ticks)
-  time: 100
+  #复活时间
+  time: 5
   #无敌时间
   noHurt: 5

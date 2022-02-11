@@ -61,7 +61,7 @@ breakBed:
 #找不到队伍
 noTeam: "&c不存在指定队伍"
 #玩家尝试睡觉
-sleep: "&c睡你MD起来嗨"
+sleep: "&c睡你MB起来嗨"
 #恢复床时仍有床
 haveBed: "&c有床还恢复NM"
 #已经恢复过一次了
@@ -89,9 +89,11 @@ useRestore:
 # {killer_team} 队伍名
 # {killer_color} 击杀者队伍颜色
 playerDie:
-  first: "&6&k_&r&5第一滴血!&r {player_color}{player}&c开局就给&r{killer_color}{killer}&c送了份快递&r&6&k_" #第一滴血
-  last: "&6&k_&r&5最终击杀!&r {player_color}{player}&c被&r{killer_color}{killer}&c摁在地上摩擦&r&6&k_"     #最终击杀
-  normal:  #普通(随机抽取)
+  first: "&6&k_&r&5第一滴血!&r {player_color}{player}&r&c开局就给&r{killer_color}{killer}&r&c送了份快递&r&6&k_" #第一滴血
+  last: "&6&k_&r&5最终击杀!&r {player_color}{player}&r&c被&r{killer_color}{killer}&r&c摁在地上摩擦&r&6&k_"     #最终击杀
+  normal:  #普通
+    FALL: "&e一步失足千古恨!&r {player_color}{player}&r&c企图硬刚牛顿万有引力"  #摔死
+
 #等待复活
 # {time} 剩余时间
 # {color} 队伍颜色

@@ -42,13 +42,13 @@ public final class BlockListener implements Listener {
     }
     @EventHandler
     public void PlayerBreakBlock(BlockBreakEvent event) {
-        if (event.getBlock().getType().data != Bed.class) {
-            if (!blocks.remove(event.getBlock())) {  //不是玩家放置的(地图)
-                event.setCancelled(artificialIsCancelled());
-            }
+        if (Game.status == GameStatus.Editing) {
             return;
         }
-        if (Game.status != GameStatus.Running && Game.status != GameStatus.Editing) {
+        if (event.getBlock().getType().data != Bed.class) {
+            if (!blocks.remove(event.getBlock())) {  //不是玩家放置的(地图)
+                event.setCancelled(true);
+            }
             return;
         }
         TeamManager.Team team = TeamManager.getTeam(event.getBlock());
@@ -60,7 +60,7 @@ public final class BlockListener implements Listener {
             }
             team.bedBroken(event.getPlayer());
         } else {
-            event.setCancelled(artificialIsCancelled());
+            event.setCancelled(true);  //地图
         }
     }
     //自然
@@ -85,9 +85,5 @@ public final class BlockListener implements Listener {
     private boolean naturalChanceIsCancelled() {
         return Game.status != GameStatus.Editing ||
                 !Config.config.getBoolean("allowBlockChangeInEditing");
-    }
-    //人为破坏
-    private boolean artificialIsCancelled() {
-        return Game.status != GameStatus.Editing;
     }
 }

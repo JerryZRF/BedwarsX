@@ -19,6 +19,7 @@ public final class ResourceManager {
     static final List<BukkitTask> tasks = new ArrayList<>();
 
     public static void load() {
+        resources.clear();
         List<Map<?, ?>> res = config.getMapList("resource");
         res.forEach(r -> {
             ItemStack item = new ItemStack(Material.getMaterial((String) r.get("material")));
@@ -39,10 +40,12 @@ public final class ResourceManager {
     }
 
     public static void start() {
+        stop();
+        load();
         resources.forEach(resource -> tasks.add(resource.runTaskTimer(BedwarsX.plugin, 0, resource.time)));
     }
 
-    public static void end() {
+    public static void stop() {
         tasks.forEach(BukkitTask::cancel);
         tasks.clear();
     }

@@ -16,6 +16,7 @@ public final class BlockManager {
     public static void reset() {
         plugin.getLogger().info("开始重置地图");
         blocks.forEach(block -> block.setType(Material.AIR));
+        blocks.clear();
         Game.world.getEntitiesByClass(Item.class).forEach(Entity::remove);  //清理掉落物
         plugin.getLogger().info("地图重置完成");
     }
