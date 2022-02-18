@@ -1,7 +1,7 @@
 package cf.jerryzrf.bedwarsx;
 
-import cf.jerryzrf.bedwarsx.Game.Game;
-import cf.jerryzrf.bedwarsx.Game.TeamManager;
+import cf.jerryzrf.bedwarsx.game.Game;
+import cf.jerryzrf.bedwarsx.game.TeamManager;
 import cf.jerryzrf.bedwarsx.api.Game.GameStatus;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -15,6 +15,9 @@ import java.util.List;
 
 import static cf.jerryzrf.bedwarsx.Config.message;
 
+/**
+ * @author JerryZRF
+ */
 public final class Commander implements TabExecutor {
     @Override
     @ParametersAreNonnullByDefault
@@ -57,6 +60,7 @@ public final class Commander implements TabExecutor {
                     return true;
                 }
                 team.bedBroken((Player) sender);
+                return true;
             }
             case "edit" -> {
                 if (!sender.hasPermission("bwx.edit")) {
@@ -79,9 +83,12 @@ public final class Commander implements TabExecutor {
                     return true;
                 }
                 Game.end(null);
+                return true;
+            }
+            default -> {
+                return false;
             }
         }
-        return false;
     }
 
     @Override

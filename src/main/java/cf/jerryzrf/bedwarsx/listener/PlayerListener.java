@@ -1,7 +1,7 @@
-package cf.jerryzrf.bedwarsx.Listener;
+package cf.jerryzrf.bedwarsx.listener;
 
 import cf.jerryzrf.bedwarsx.Config;
-import cf.jerryzrf.bedwarsx.Game.Game;
+import cf.jerryzrf.bedwarsx.game.Game;
 import cf.jerryzrf.bedwarsx.Utils;
 import cf.jerryzrf.bedwarsx.api.Game.GameStatus;
 import net.kyori.adventure.text.Component;
@@ -27,22 +27,25 @@ import static cf.jerryzrf.bedwarsx.Config.config;
 import static cf.jerryzrf.bedwarsx.Config.message;
 import static cf.jerryzrf.bedwarsx.Utils.apply;
 
+/**
+ * @author JerryZRF
+ */
 @SuppressWarnings("deprecation")
 public final class PlayerListener implements Listener {
     @EventHandler
-    public void PlayerJoin(PlayerJoinEvent event) {
+    public void playerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (Game.status == GameStatus.Waiting) {
             player.setGameMode(GameMode.SURVIVAL);
-            Game.inGamePlayers.add(player);
+            Game.IN_GAME_PLAYERS.add(player);
         } else if (Game.status == GameStatus.Running) {
-            if (Game.rejoinPlayers.contains(player.getUniqueId())) {
-                player.setDisplayName(Game.players.get(player.getUniqueId()).color.getColorString() + "[" + Game.players.get(player.getUniqueId()).name + "]" + player.getDisplayName());
-                Game.inGamePlayers.add(player);
+            if (Game.REJOIN_PLAYERS.contains(player.getUniqueId())) {
+                player.setDisplayName(Game.PLAYERS.get(player.getUniqueId()).color.getColorString() + "[" + Game.PLAYERS.get(player.getUniqueId()).name + "]" + player.getDisplayName());
+                Game.IN_GAME_PLAYERS.add(player);
                 event.setJoinMessage(player.getDisplayName() + "断线重连");
             } else {
                 player.setGameMode(GameMode.SPECTATOR);
-                Game.players.put(player.getUniqueId(), Game.watcher);
+                Game.PLAYERS.put(player.getUniqueId(), Game.WATCHER);
             }
         } else if (Game.status == GameStatus.Editing) {
             if (!player.hasPermission("bwx.edit")) {
@@ -54,36 +57,37 @@ public final class PlayerListener implements Listener {
         player.setInvisible(false);
     }
     @EventHandler
-    public void PlayerQuit(PlayerQuitEvent event) {
+    public void playerQuit(PlayerQuitEvent event) {
         if (Game.status == GameStatus.Editing) {
             return;
         }
         Player player = event.getPlayer();
-        Game.inGamePlayers.remove(player);
-        Game.players.remove(player.getUniqueId());
+        Game.IN_GAME_PLAYERS.remove(player);
+        Game.PLAYERS.remove(player.getUniqueId());
         if (Game.status == GameStatus.Running) {
-            Game.rejoinPlayers.add(player.getUniqueId());
-            Game.inGamePlayers.remove(player);
-            //稍后添加至配置文件
+            Game.REJOIN_PLAYERS.add(player.getUniqueId());
+            Game.IN_GAME_PLAYERS.remove(player);
+            //TODO 添加至语言文件
             event.quitMessage(Component.text(player.getDisplayName() + "退出了游戏，但他仍能断线重连"));
             return;
         }
+        //TODO 添加至语言文件
         event.quitMessage(Component.text(player.getDisplayName() + "退出了游戏"));
     }
     @EventHandler
-    public void PlayerChat(AsyncPlayerChatEvent event) {
+    public void playerChat(AsyncPlayerChatEvent event) {
         if (Game.status == GameStatus.Running) {
-            if (Game.players.get(event.getPlayer().getUniqueId()) == Game.watcher && !config.getBoolean("watcher.chat")) {
+            if (Game.PLAYERS.get(event.getPlayer().getUniqueId()) == Game.WATCHER && !config.getBoolean("watcher.chat")) {
                 event.setCancelled(true);
-                Utils.getPlayersByTeam(Game.watcher).forEach(player ->
+                Utils.getPlayersByTeam(Game.WATCHER).forEach(player ->
                         player.sendMessage("[" + config.getString("watcher.name", "旁观者") + "]<" + event.getPlayer() + ">" + event.getMessage()));
             }
             event.setFormat(
-                    apply(event.getPlayer(), Config.config.getString("chatInGame"), Map.of("{team_color}", Game.players.get(event.getPlayer().getUniqueId()).color.getColorString())));
+                    apply(event.getPlayer(), Config.config.getString("chatInGame"), Map.of("{team_color}", Game.PLAYERS.get(event.getPlayer().getUniqueId()).color.getColorString())));
         }
     }
     @EventHandler
-    public void PlayerSleep(PlayerInteractEvent event) {
+    public void playerSleep(PlayerInteractEvent event) {
         if (!event.getAction().isRightClick() || event.getClickedBlock() == null || event.getClickedBlock().getType().data != Bed.class) {
             return;
         }
@@ -91,7 +95,7 @@ public final class PlayerListener implements Listener {
         event.setCancelled(true);
     }
     @EventHandler
-    public void PlayerDamage(EntityDamageEvent event) {
+    public void playerDamage(EntityDamageEvent event) {
         if (Game.status != GameStatus.Running) {
             event.setCancelled(true);
             return;
@@ -104,9 +108,10 @@ public final class PlayerListener implements Listener {
             event.setCancelled(true);
         }
     }
+    /** 一血 */
     private static boolean firstBlood = true;
     @EventHandler
-    public void PlayerDie(PlayerDeathEvent event) {
+    public void playerDie(PlayerDeathEvent event) {
         if (Game.status != GameStatus.Running) {
             event.setCancelled(true);
             return;
@@ -121,23 +126,23 @@ public final class PlayerListener implements Listener {
         if (entity instanceof Player) {
             killer = (Player) entity;
         } else {
-            if ((Game.animals.get(entity) == null)) {
+            if ((Game.ANIMALS.get(entity) == null)) {
                 Game.playerDie(player);
                 return;
             }
-            killer = Bukkit.getPlayer(Game.animals.get(entity));
+            killer = Bukkit.getPlayer(Game.ANIMALS.get(entity));
         }
         Map<String, String> map = new HashMap<>();
         map.put("{player}", player.getDisplayName());
-        map.put("{player_team}", Game.players.get(player.getUniqueId()).name);
-        map.put("{player_color}", Game.players.get(player.getUniqueId()).color.getColorString());
+        map.put("{player_team}", Game.PLAYERS.get(player.getUniqueId()).name);
+        map.put("{player_color}", Game.PLAYERS.get(player.getUniqueId()).color.getColorString());
         map.put("{killer}", killer.getDisplayName());
-        map.put("{killer_team}", Game.players.get(killer.getUniqueId()).name);
-        map.put("{killer_color}", Game.players.get(killer.getUniqueId()).color.getColorString());
+        map.put("{killer_team}", Game.PLAYERS.get(killer.getUniqueId()).name);
+        map.put("{killer_color}", Game.PLAYERS.get(killer.getUniqueId()).color.getColorString());
         if (firstBlood) {
             event.setDeathMessage(apply(player, message.getString("playerDie.first"), map));
             firstBlood = false;
-        } else if (!Game.players.get(player.getUniqueId()).isBed) {
+        } else if (!Game.PLAYERS.get(player.getUniqueId()).isBed) {
             event.setDeathMessage(apply(player, message.getString("playerDie.last"), map));
         }
         Game.playerDie(player);

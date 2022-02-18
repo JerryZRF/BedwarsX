@@ -1,4 +1,4 @@
-package cf.jerryzrf.bedwarsx.Game;
+package cf.jerryzrf.bedwarsx.game;
 
 import cf.jerryzrf.bedwarsx.Config;
 import cf.jerryzrf.bedwarsx.Utils;
@@ -20,54 +20,57 @@ import static cf.jerryzrf.bedwarsx.Config.config;
 import static cf.jerryzrf.bedwarsx.Config.message;
 import static cf.jerryzrf.bedwarsx.Utils.apply;
 
+/**
+ * @author JerryZRF
+ */
 @SuppressWarnings("deprecation")
 public final class Game {
     public static GameStatus status = GameStatus.Waiting;
-    public static final World world = Bukkit.getWorld(config.getString("world", "world"));
-    public static final TeamManager.Team watcher = new TeamManager.Team(apply(null, Config.config.getString("watcher.name", "旁观者")),
+    public static final World WORLD = Bukkit.getWorld(config.getString("world", "world"));
+    public static final TeamManager.Team WATCHER = new TeamManager.Team(apply(null, Config.config.getString("watcher.name", "旁观者")),
             null,
             null,
-            new Location(world,
+            new Location(WORLD,
                     Config.config.getInt("watcher.loc.x"),
                     Config.config.getInt("watcher.loc.y"),
                     Config.config.getInt("watcher.loc.z")
             )
     );  //旁观者队伍
-    public static final Map<UUID, TeamManager.Team> players = new HashMap<>();
-    public static final Set<Player> inGamePlayers = new HashSet<>();
-    public static final Set<UUID> rejoinPlayers = new HashSet<>();
-    public static final Map<Entity, UUID> animals = new HashMap<>();
-    public static final Location center = new Location(world, config.getInt("watcher.loc.x"), config.getInt("watcher.loc.y"), config.getInt("watcher.loc.z"));
+    public static final Map<UUID, TeamManager.Team> PLAYERS = new HashMap<>();
+    public static final Set<Player> IN_GAME_PLAYERS = new HashSet<>();
+    public static final Set<UUID> REJOIN_PLAYERS = new HashSet<>();
+    public static final Map<Entity, UUID> ANIMALS = new HashMap<>();
+    public static final Location CENTRE = new Location(WORLD, config.getInt("watcher.loc.x"), config.getInt("watcher.loc.y"), config.getInt("watcher.loc.z"));
     public static final Map<UUID, Long> noHurtTime = new HashMap<>();
 
     public static void start() {
         changeStatus(GameStatus.Running);
         cdTask.cancel();
         //分配队伍
-        int n = inGamePlayers.size() / TeamManager.teams.size() + (inGamePlayers.size() % TeamManager.teams.size() == 0 ? 0 : 1);
+        int n = IN_GAME_PLAYERS.size() / TeamManager.TEAMS.size() + (IN_GAME_PLAYERS.size() % TeamManager.TEAMS.size() == 0 ? 0 : 1);
         Random random = new Random();
-        inGamePlayers.forEach(player -> {
+        IN_GAME_PLAYERS.forEach(player -> {
             noHurtTime.put(player.getUniqueId(), 0L);
             TeamManager.Team team;
             do {
-                team = TeamManager.teams.get(random.nextInt(TeamManager.teams.size()));
+                team = TeamManager.TEAMS.get(random.nextInt(TeamManager.TEAMS.size()));
             } while (Utils.getPlayersByTeam(team).size() == n);
             player.setDisplayName(team.color.getChatColor() + "[" + team.name + "]" + player.getDisplayName() + "§r");
-            players.put(player.getUniqueId(), team);
+            PLAYERS.put(player.getUniqueId(), team);
         });  //智障算法
         //游戏开始
-        inGamePlayers.forEach(player -> {
+        IN_GAME_PLAYERS.forEach(player -> {
             player.showTitle(Title.title(
                     Component.text(apply(player, message.getString("startTitle0", "游戏开始"))),
                     Component.text(apply(player, message.getString("startTitle1", "摧毁敌方的床")))
             ));
-            player.teleport(players.get(player.getUniqueId()).spawn);
+            player.teleport(PLAYERS.get(player.getUniqueId()).spawn);
             player.setGameMode(GameMode.SURVIVAL);
         });
         new BukkitRunnable() {
             @Override
             public void run() {
-                inGamePlayers.forEach(Player::resetTitle);
+                IN_GAME_PLAYERS.forEach(Player::resetTitle);
             }
         }.runTaskLater(plugin, 20);
         ResourceManager.start();
@@ -80,7 +83,7 @@ public final class Game {
     }
 
     public static void init() {
-        world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+        WORLD.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
         Bukkit.getOnlinePlayers().forEach(player -> player.kick(Component.text("服务器重置")));
         changeStatus(GameStatus.Waiting);
         countdown = Config.config.getInt("countdown.default");
@@ -88,8 +91,8 @@ public final class Game {
     }
 
     public static void reset() {
-        players.clear();
-        inGamePlayers.clear();
+        PLAYERS.clear();
+        IN_GAME_PLAYERS.clear();
         ResourceManager.stop();
         BlockManager.reset();
         TeamManager.reset();
@@ -106,19 +109,19 @@ public final class Game {
     }
 
     public static void playerDie(Player player) {
-        player.setGameMode(GameMode.SPECTATOR);  //旁观模式
-        player.teleport(center);
-        if (!players.get(player.getUniqueId()).isBed) {
-            players.put(player.getUniqueId(), watcher);
+        player.setGameMode(GameMode.SPECTATOR);
+        player.teleport(CENTRE);
+        if (!PLAYERS.get(player.getUniqueId()).isBed) {
+            PLAYERS.put(player.getUniqueId(), WATCHER);
             player.setInvisible(true);
-            inGamePlayers.remove(player);
+            IN_GAME_PLAYERS.remove(player);
             TeamManager.Team team = checkWin();
             if (team != null) {
                 end(team);
             }
         } else {
             Map<String, String> map = new HashMap<>();
-            map.put("{color}", players.get(player.getUniqueId()).color.getColorString());
+            map.put("{color}", PLAYERS.get(player.getUniqueId()).color.getColorString());
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -154,10 +157,10 @@ public final class Game {
 
     public static TeamManager.Team checkWin() {
         TeamManager.Team team = null;
-        for (Player player : inGamePlayers) {
+        for (Player player : IN_GAME_PLAYERS) {
             if (team == null) {
-                team = players.get(player.getUniqueId());
-            } else if (team != players.get(player.getUniqueId())) {
+                team = PLAYERS.get(player.getUniqueId());
+            } else if (team != PLAYERS.get(player.getUniqueId())) {
                 return null;
             }
         }
@@ -166,7 +169,7 @@ public final class Game {
 
     public static void debug() {
         System.out.println(status.name());
-        players.forEach(((uuid, team) ->
+        PLAYERS.forEach(((uuid, team) ->
                 System.out.println(Bukkit.getPlayer(uuid).getDisplayName() + " " + team.name)));
     }
 
@@ -176,22 +179,22 @@ public final class Game {
          cdTask = new BukkitRunnable() {
             @Override
             public void run() {
-                if (inGamePlayers.size() == config.getInt("maxPlayer") && countdown > 5) {
+                if (IN_GAME_PLAYERS.size() == config.getInt("maxPlayer") && countdown > 5) {
                     countdown = 5;
-                    inGamePlayers.forEach(player -> player.showTitle(Title.title(
+                    IN_GAME_PLAYERS.forEach(player -> player.showTitle(Title.title(
                             Component.text(apply(player, message.getString("cdCutTitle0"))),
                             Component.text(apply(player, message.getString("cdCutTitle1"))),
                             Title.Times.of(Duration.ZERO, Duration.ofMillis(1100), Duration.ZERO)
                     )));
                 }
                 if (config.getBoolean("fair")) {
-                    if (config.getInt("maxPlayer") % inGamePlayers.size() == 0) {
+                    if (config.getInt("maxPlayer") % IN_GAME_PLAYERS.size() == 0) {
                         cd();
                     } else {
                         cdStop();
                     }
                 } else {
-                    if (inGamePlayers.size() >= 2) {
+                    if (IN_GAME_PLAYERS.size() >= 2) {
                         cd();
                     } else {
                         cdStop();
@@ -210,7 +213,7 @@ public final class Game {
         }.runTaskTimerAsynchronously(plugin, 0, 20);
     }
     private static void cdStop() {
-        inGamePlayers.forEach(player -> player.showTitle(Title.title(
+        IN_GAME_PLAYERS.forEach(player -> player.showTitle(Title.title(
                 Component.text(apply(player, message.getString("cdStopTitle0"))),
                 Component.text(apply(player, message.getString("cdStopTitle1"))),
                 Title.Times.of(Duration.ZERO, Duration.ofMillis(1100), Duration.ZERO)
@@ -218,7 +221,7 @@ public final class Game {
     }
     private static void cd() {
         countdown--;
-        inGamePlayers.forEach(player -> player.showTitle(Title.title(
+        IN_GAME_PLAYERS.forEach(player -> player.showTitle(Title.title(
                 Component.text(apply(player, message.getString("cdTitle0"))),
                 Component.text(apply(player, message.getString("cdTitle1"))),
                 Title.Times.of(Duration.ZERO, Duration.ofMillis(1100), Duration.ZERO)

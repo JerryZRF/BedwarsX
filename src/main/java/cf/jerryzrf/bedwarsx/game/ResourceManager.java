@@ -1,4 +1,4 @@
-package cf.jerryzrf.bedwarsx.Game;
+package cf.jerryzrf.bedwarsx.game;
 
 import cf.jerryzrf.bedwarsx.BedwarsX;
 import org.bukkit.Location;
@@ -12,14 +12,17 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.*;
 
 import static cf.jerryzrf.bedwarsx.Config.config;
-import static cf.jerryzrf.bedwarsx.Game.Game.world;
+import static cf.jerryzrf.bedwarsx.game.Game.WORLD;
 
+/**
+ * @author JerryZRF
+ */
 public final class ResourceManager {
-    private static final Set<Resource> resources = new HashSet<>();
-    static final List<BukkitTask> tasks = new ArrayList<>();
+    private static final Set<Resource> RESOURCES = new HashSet<>();
+    static final List<BukkitTask> TASKS = new ArrayList<>();
 
     public static void load() {
-        resources.clear();
+        RESOURCES.clear();
         List<Map<?, ?>> res = config.getMapList("resource");
         res.forEach(r -> {
             ItemStack item = new ItemStack(Material.getMaterial((String) r.get("material")));
@@ -30,24 +33,24 @@ public final class ResourceManager {
             List<Map<?, ?>> loc = (List<Map<?, ?>>) r.get("loc");
             List<Location> locations = new ArrayList<>();
             loc.forEach(l -> locations.add(new Location(
-                    world,
+                    WORLD,
                     (double) l.get("x"),
                     (double) l.get("y"),
                     (double) l.get("z"))
             ));
-        resources.add(new Resource(item, (int) r.get("time"), locations));
+        RESOURCES.add(new Resource(item, (int) r.get("time"), locations));
         });
     }
 
     public static void start() {
         stop();
         load();
-        resources.forEach(resource -> tasks.add(resource.runTaskTimer(BedwarsX.plugin, 0, resource.time)));
+        RESOURCES.forEach(resource -> TASKS.add(resource.runTaskTimer(BedwarsX.plugin, 0, resource.time)));
     }
 
     public static void stop() {
-        tasks.forEach(BukkitTask::cancel);
-        tasks.clear();
+        TASKS.forEach(BukkitTask::cancel);
+        TASKS.clear();
     }
 
     public final static class Resource extends BukkitRunnable {
@@ -64,7 +67,7 @@ public final class ResourceManager {
         @Override
         public void run() {
             loc.forEach(l -> {
-                Item i = world.dropItem(l, item);
+                Item i = WORLD.dropItem(l, item);
                 i.setVelocity(i.getVelocity().multiply(0));
             });
         }

@@ -1,4 +1,4 @@
-package cf.jerryzrf.bedwarsx.Game;
+package cf.jerryzrf.bedwarsx.game;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -10,14 +10,19 @@ import java.util.List;
 
 import static cf.jerryzrf.bedwarsx.BedwarsX.plugin;
 
+/**
+ * @author JerryZRF
+ */
 public final class BlockManager {
-    public static final List<Block> blocks = new LinkedList<>();  //玩家放置的方块
+    /** 玩家放置的方块 */
+    public static final List<Block> BLOCKS = new LinkedList<>();
 
     public static void reset() {
         plugin.getLogger().info("开始重置地图");
-        blocks.forEach(block -> block.setType(Material.AIR));
-        blocks.clear();
-        Game.world.getEntitiesByClass(Item.class).forEach(Entity::remove);  //清理掉落物
+        BLOCKS.forEach(block -> block.setType(Material.AIR));
+        BLOCKS.clear();
+        //清理掉落物
+        Game.WORLD.getEntitiesByClass(Item.class).forEach(Entity::remove);
         plugin.getLogger().info("地图重置完成");
     }
 }

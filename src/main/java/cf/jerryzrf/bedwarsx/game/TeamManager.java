@@ -1,4 +1,4 @@
-package cf.jerryzrf.bedwarsx.Game;
+package cf.jerryzrf.bedwarsx.game;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -16,19 +16,22 @@ import static cf.jerryzrf.bedwarsx.Config.config;
 import static cf.jerryzrf.bedwarsx.Config.message;
 import static cf.jerryzrf.bedwarsx.Utils.apply;
 
+/**
+ * @author JerryZRF
+ */
 public final class TeamManager {
-    public static final List<Team> teams = new ArrayList<>();
+    public static final List<Team> TEAMS = new ArrayList<>();
 
     public static void load() {
         List<Map<?, ?>> teamList = config.getMapList("team");
-        teamList.forEach(team -> teams.add(new Team(
+        teamList.forEach(team -> TEAMS.add(new Team(
                 (String) team.get("name"),
                 TeamColor.valueOf((String) team.get("color")),
-                new Location(Game.world,
+                new Location(Game.WORLD,
                         (double) ((Map<?, ?>) team.get("bed")).get("x"),
                         (double) ((Map<?, ?>) team.get("bed")).get("y"),
                         (double) ((Map<?, ?>) team.get("bed")).get("z")),
-                new Location(Game.world,
+                new Location(Game.WORLD,
                         (double) ((Map<?, ?>) team.get("spawn")).get("x"),
                         (double) ((Map<?, ?>) team.get("spawn")).get("y"),
                         (double) ((Map<?, ?>) team.get("spawn")).get("z"))
@@ -38,7 +41,7 @@ public final class TeamManager {
     @Nullable
     public static Team getTeam(String name) {
         Team[] team = {null};
-        teams.forEach(t -> {
+        TEAMS.forEach(t -> {
             if (t.name.equalsIgnoreCase(name)) {
                 team[0] = t;
             }
@@ -47,7 +50,7 @@ public final class TeamManager {
     }
     @Nullable
     public static Team getTeam(Block bed) {
-        for (Team t : teams) {
+        for (Team t : TEAMS) {
             if (t.bed.equals(bed)) {
                 return t;
             }
@@ -55,33 +58,48 @@ public final class TeamManager {
         return null;
     }
     public static void debug() {
-        teams.forEach(team -> {
+        TEAMS.forEach(team -> {
             System.out.println(team.name);
             System.out.println(team.color);
             System.out.println(team.bed.getX() + " " + team.bed.getY() + " " + team.bed.getZ());
         });
     }
     public static void reset() {
-        teams.forEach(Team::reset);
+        TEAMS.forEach(Team::reset);
     }
 
     public enum TeamColor {
-        WHITE,      //白色
-        ORANGE,     //橙色
-        MAGENTA,    //品红色
-        LIGHT_BLUE, //浅蓝色
-        YELLOW,     //黄色
-        LIME,       //黄绿色
-        PINK,       //粉色
-        GREY,       //灰色
-        LIGHT_GRAY, //浅灰色
-        CYAN,       //青色
-        PURPLE,     //紫色
-        BLUE,       //蓝色
-        BROWN,      //棕色
-        GREEN,      //绿色
-        RED,        //红色
-        BLACK;      //黑色
+        //白色
+        WHITE,
+        //橙色
+        ORANGE,
+        MAGENTA,
+        //浅蓝色
+        LIGHT_BLUE,
+        //黄色
+        YELLOW,
+        //黄绿色
+        LIME,
+        //粉色
+        PINK,
+        //灰色
+        GREY,
+        LIGHT_GRAY,
+        //浅灰色
+        //青色
+        CYAN,
+        //紫色
+        PURPLE,
+        //蓝色
+        BLUE,
+        //棕色
+        BROWN,
+        //绿色
+        GREEN,
+        //红色
+        RED,
+        //黑色
+        BLACK;
 
         public ChatColor getChatColor() {
             return ChatColor.valueOf(name());
@@ -121,13 +139,13 @@ public final class TeamManager {
 
         public void bedBroken(Player player) {
             isBed = false;
-            Game.inGamePlayers.forEach(p -> {
-                Map<String, String> map = new HashMap<>();
+            Game.IN_GAME_PLAYERS.forEach(p -> {
+                Map<String, String> map = new HashMap<>(4, 1f);
                 map.put("{player}", player.getDisplayName());
                 map.put("{team}", name);
                 map.put("{team_color}", color.getColorString());
-                map.put("{player_color}", Game.players.get(player.getUniqueId()).color.getColorString());
-                if (Game.players.get(p.getUniqueId()) == this) {
+                map.put("{player_color}", Game.PLAYERS.get(player.getUniqueId()).color.getColorString());
+                if (Game.PLAYERS.get(p.getUniqueId()) == this) {
                     p.showTitle(Title.title(
                             Component.text(apply(p, message.getString("breakBed.self.title0"), map)),
                             Component.text(apply(p, message.getString("breakBed.self.title1"), map))
@@ -146,12 +164,12 @@ public final class TeamManager {
         public void restoreBed(Player player) {
             isBed = true;
             useRestore = true;
-            Game.inGamePlayers.forEach(p -> {
-                Map<String, String> map = new HashMap<>();
+            Game.IN_GAME_PLAYERS.forEach(p -> {
+                Map<String, String> map = new HashMap<>(3, 1f);
                 map.put("{player}", player.getDisplayName());
                 map.put("{team}", name);
                 map.put("{color}", color.getColorString());
-                if (Game.players.get(p.getUniqueId()) == this) {
+                if (Game.PLAYERS.get(p.getUniqueId()) == this) {
                     p.showTitle(Title.title(
                             Component.text(apply(p, message.getString("useRestore.self.title0"), map)),
                             Component.text(apply(p, message.getString("useRestore.self.title1"), map))
@@ -169,9 +187,9 @@ public final class TeamManager {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Team team = (Team) o;
+            if (!(o instanceof Team team)) {
+                return false;
+            }
             return Objects.equals(name, team.name);
         }
 

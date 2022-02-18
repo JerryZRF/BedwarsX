@@ -1,7 +1,7 @@
 package cf.jerryzrf.bedwarsx;
 
-import cf.jerryzrf.bedwarsx.Game.Game;
-import cf.jerryzrf.bedwarsx.Game.TeamManager;
+import cf.jerryzrf.bedwarsx.game.Game;
+import cf.jerryzrf.bedwarsx.game.TeamManager;
 import lombok.NonNull;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author JerryZRF
+ */
 public final class Utils {
     /**
      * 把玩家传送到指定服务器
@@ -28,7 +31,7 @@ public final class Utils {
 
         try {
             out.writeUTF("Connect");
-            out.writeUTF(server); // Target Server
+            out.writeUTF(server);
         } catch (IOException e) {
             // Can never happen
         }
@@ -93,7 +96,7 @@ public final class Utils {
      */
     public static List<Player> getPlayersByTeam(TeamManager.Team team) {
         List<Player> players = new ArrayList<>();
-        Game.players.forEach(((p, t) -> {
+        Game.PLAYERS.forEach(((p, t) -> {
             if (t == team) {
                 players.add(Bukkit.getPlayer(p));
             }

@@ -10,6 +10,9 @@ import java.io.IOException;
 
 import static cf.jerryzrf.bedwarsx.BedwarsX.plugin;
 
+/**
+ * @author JerryZRF
+ */
 public final class Config {
     public static YamlConfiguration config;
     public static YamlConfiguration message;

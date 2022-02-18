@@ -1,9 +1,9 @@
-package cf.jerryzrf.bedwarsx.Listener;
+package cf.jerryzrf.bedwarsx.listener;
 
 import cf.jerryzrf.bedwarsx.BedwarsX;
 import cf.jerryzrf.bedwarsx.Config;
-import cf.jerryzrf.bedwarsx.Game.BlockManager;
-import cf.jerryzrf.bedwarsx.Game.Game;
+import cf.jerryzrf.bedwarsx.game.BlockManager;
+import cf.jerryzrf.bedwarsx.game.Game;
 import cf.jerryzrf.bedwarsx.Utils;
 import cf.jerryzrf.bedwarsx.api.Event.GameStatusChangeEvent;
 import cf.jerryzrf.bedwarsx.api.Game.GameStatus;
@@ -16,9 +16,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import static cf.jerryzrf.bedwarsx.Config.message;
 import static cf.jerryzrf.bedwarsx.Utils.apply;
 
+/**
+ * @author JerryZRF
+ */
 public final class GameModeListener implements Listener {
     @EventHandler
-    public void GameEnd(GameStatusChangeEvent event) {
+    public void gameEnd(GameStatusChangeEvent event) {
         if (event.getStatus() != GameStatus.Ending) {
             return;
         }

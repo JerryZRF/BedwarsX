@@ -1,8 +1,8 @@
-package cf.jerryzrf.bedwarsx.Listener;
+package cf.jerryzrf.bedwarsx.listener;
 
 import cf.jerryzrf.bedwarsx.Config;
-import cf.jerryzrf.bedwarsx.Game.Game;
-import cf.jerryzrf.bedwarsx.Game.TeamManager;
+import cf.jerryzrf.bedwarsx.game.Game;
+import cf.jerryzrf.bedwarsx.game.TeamManager;
 import cf.jerryzrf.bedwarsx.api.Game.GameStatus;
 import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Player;
@@ -11,19 +11,21 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 
 import static cf.jerryzrf.bedwarsx.Config.message;
-import static cf.jerryzrf.bedwarsx.Game.BlockManager.blocks;
+import static cf.jerryzrf.bedwarsx.game.BlockManager.BLOCKS;
 import static cf.jerryzrf.bedwarsx.Utils.apply;
 
+/**
+ * @author JerryZRF
+ */
 public final class BlockListener implements Listener {
-    //人为
     @EventHandler
-    public void PlayerPutBlock(BlockPlaceEvent event) {
+    public void playerPutBlock(BlockPlaceEvent event) {
         if (Game.status == GameStatus.Running) {
             if (event.getBlock().getType().data != Bed.class) {
-                blocks.add(event.getBlock());
+                BLOCKS.add(event.getBlock());
                 return;
             }
-            TeamManager.Team team = Game.players.get(event.getPlayer().getUniqueId());
+            TeamManager.Team team = Game.PLAYERS.get(event.getPlayer().getUniqueId());
             Player player = event.getPlayer();
             if (team.isBed) {
                 player.sendMessage(apply(player, message.getString("haveBed", "床未被破坏!")));
@@ -41,47 +43,47 @@ public final class BlockListener implements Listener {
         }
     }
     @EventHandler
-    public void PlayerBreakBlock(BlockBreakEvent event) {
+    public void playerBreakBlock(BlockBreakEvent event) {
         if (Game.status == GameStatus.Editing) {
             return;
         }
         if (event.getBlock().getType().data != Bed.class) {
-            if (!blocks.remove(event.getBlock())) {  //不是玩家放置的(地图)
+            //不是玩家放置的(地图)
+            if (!BLOCKS.remove(event.getBlock())) {
                 event.setCancelled(true);
             }
             return;
         }
         TeamManager.Team team = TeamManager.getTeam(event.getBlock());
         if (team != null) {
-            if (Game.players.get(event.getPlayer().getUniqueId()).equals(team)) {
+            if (Game.PLAYERS.get(event.getPlayer().getUniqueId()).equals(team)) {
                 event.getPlayer().sendMessage(apply(event.getPlayer(), message.getString("brokeSelf", "你不可以破坏自己的床")));
                 event.setCancelled(true);
                 return;
             }
             team.bedBroken(event.getPlayer());
         } else {
-            event.setCancelled(true);  //地图
+            //地图
+            event.setCancelled(true);
         }
     }
-    //自然
     @EventHandler
-    public void BlockChange(BlockFadeEvent event) {
+    public void blockChange(BlockFadeEvent event) {
         event.setCancelled(naturalChanceIsCancelled());
     }
     @EventHandler
-    public void BlockChange(BlockBurnEvent event) {
+    public void blockChange(BlockBurnEvent event) {
         event.setCancelled(naturalChanceIsCancelled());
     }
     @EventHandler
-    public void BlockChange(BlockFormEvent event) {
+    public void blockChange(BlockFormEvent event) {
         event.setCancelled(naturalChanceIsCancelled());
     }
     @EventHandler
-    public void BlockChange(BlockIgniteEvent event) {
+    public void blockChange(BlockIgniteEvent event) {
         event.setCancelled(naturalChanceIsCancelled());
     }
 
-    //自然改变
     private boolean naturalChanceIsCancelled() {
         return Game.status != GameStatus.Editing ||
                 !Config.config.getBoolean("allowBlockChangeInEditing");

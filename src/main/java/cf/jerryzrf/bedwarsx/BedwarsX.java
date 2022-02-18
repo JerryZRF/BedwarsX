@@ -1,11 +1,11 @@
 package cf.jerryzrf.bedwarsx;
 
-import cf.jerryzrf.bedwarsx.Game.Game;
-import cf.jerryzrf.bedwarsx.Game.ResourceManager;
-import cf.jerryzrf.bedwarsx.Game.TeamManager;
-import cf.jerryzrf.bedwarsx.Listener.BlockListener;
-import cf.jerryzrf.bedwarsx.Listener.GameModeListener;
-import cf.jerryzrf.bedwarsx.Listener.PlayerListener;
+import cf.jerryzrf.bedwarsx.game.Game;
+import cf.jerryzrf.bedwarsx.game.ResourceManager;
+import cf.jerryzrf.bedwarsx.game.TeamManager;
+import cf.jerryzrf.bedwarsx.listener.BlockListener;
+import cf.jerryzrf.bedwarsx.listener.GameModeListener;
+import cf.jerryzrf.bedwarsx.listener.PlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,9 +14,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Base64;
 
+/**
+ * @author JerryZRF
+ */
 public final class BedwarsX extends JavaPlugin {
-    public static final String version = "0.1.0-dev";
-    public static final int versionNum = 2022012301;
+    public static final String VERSION = "0.1.0-dev";
+    public static final int VERSION_NUM = 2022012301;
     public static BedwarsX plugin;
 
     @Override
@@ -26,10 +29,10 @@ public final class BedwarsX extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("当前版本" + version + "-" + versionNum);
+        getLogger().info("当前版本" + VERSION + "-" + VERSION_NUM);
         int newVersion = getNewVersion();
         if (newVersion != -1) {
-            if (versionNum == newVersion) {
+            if (VERSION_NUM == newVersion) {
                 getLogger().info("当前版本是最新版本");
             } else {
                 getLogger().warning("当前版本不是最新版本，请尽快更新");
