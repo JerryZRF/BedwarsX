@@ -1,27 +1,28 @@
 package cf.jerryzrf.bedwarsx.listener;
 
 import cf.jerryzrf.bedwarsx.Config;
-import cf.jerryzrf.bedwarsx.game.Game;
 import cf.jerryzrf.bedwarsx.Utils;
 import cf.jerryzrf.bedwarsx.api.Game.GameStatus;
+import cf.jerryzrf.bedwarsx.game.Damage;
+import cf.jerryzrf.bedwarsx.game.Game;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.block.data.type.Bed;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static cf.jerryzrf.bedwarsx.Config.config;
 import static cf.jerryzrf.bedwarsx.Config.message;
@@ -42,6 +43,7 @@ public final class PlayerListener implements Listener {
             if (Game.REJOIN_PLAYERS.contains(player.getUniqueId())) {
                 player.setDisplayName(Game.PLAYERS.get(player.getUniqueId()).color.getColorString() + "[" + Game.PLAYERS.get(player.getUniqueId()).name + "]" + player.getDisplayName());
                 Game.IN_GAME_PLAYERS.add(player);
+                //TODO 添加到语言文件
                 event.setJoinMessage(player.getDisplayName() + "断线重连");
             } else {
                 player.setGameMode(GameMode.SPECTATOR);
@@ -49,6 +51,7 @@ public final class PlayerListener implements Listener {
             }
         } else if (Game.status == GameStatus.Editing) {
             if (!player.hasPermission("bwx.edit")) {
+                //TODO 添加到语言文件
                 player.kick(Component.text("服务器正在施工，请稍后再试..."));
             }
         }
@@ -94,18 +97,37 @@ public final class PlayerListener implements Listener {
         event.getPlayer().sendActionBar(message.getString("sleep", "你不能睡觉"));
         event.setCancelled(true);
     }
+
+    private static final Map<UUID, Damage> PLAYER_DAMAGE = new HashMap<>(config.getInt("maxPlayer", 16), 1f);
     @EventHandler
-    public void playerDamage(EntityDamageEvent event) {
+    public void playerDamageByEntity(EntityDamageEvent ede) {
         if (Game.status != GameStatus.Running) {
-            event.setCancelled(true);
+            ede.setCancelled(true);
             return;
         }
-        if (!(event.getEntity() instanceof Player player)) {
+        if (!(ede.getEntity() instanceof Player injured)) {
             return;
         }
-        if ((new Date()).getTime() - Game.noHurtTime.get(player.getUniqueId()) <= config.getInt("respawn.noHurt") * 1000L) {
-            player.sendMessage(apply(player, message.getString("noHurt", "无敌时间")));
-            event.setCancelled(true);
+        if ((Utils.getTime() - Game.NO_HURT_TIME.get(injured.getUniqueId()) <= config.getInt("respawn.noHurt") * 1000L)) {
+            injured.sendMessage(apply(injured, message.getString("noHurt", "无敌时间")));
+            ede.setCancelled(true);
+            return;
+        }
+        EntityDamageByEntityEvent edbee;
+        if (ede instanceof EntityDamageByEntityEvent) {
+            edbee = (EntityDamageByEntityEvent) ede;
+        } else {
+            return;
+        }
+        if (!(edbee.getDamager() instanceof Player damager)) {
+            UUID attacker = Game.ANIMALS.get(edbee.getEntity());
+            if (attacker != null) {
+                PLAYER_DAMAGE.put(injured.getUniqueId(), new Damage(attacker, Utils.getTime()));
+            } else {
+                edbee.setCancelled(true);
+            }
+        } else {
+            PLAYER_DAMAGE.put(injured.getUniqueId(), new Damage(damager.getUniqueId(), Utils.getTime()));
         }
     }
     /** 一血 */
@@ -121,18 +143,11 @@ public final class PlayerListener implements Listener {
             Game.playerDie(player);
         }
         EntityDamageEvent.DamageCause cause = player.getLastDamageCause().getCause();
-        Entity entity = player.getLastDamageCause().getEntity();
-        Player killer;
-        if (entity instanceof Player) {
-            killer = (Player) entity;
-        } else {
-            if ((Game.ANIMALS.get(entity) == null)) {
-                Game.playerDie(player);
-                return;
-            }
-            killer = Bukkit.getPlayer(Game.ANIMALS.get(entity));
+        Player killer = player.getKiller();
+        if (killer == null) {
+
         }
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(8, 1f);
         map.put("{player}", player.getDisplayName());
         map.put("{player_team}", Game.PLAYERS.get(player.getUniqueId()).name);
         map.put("{player_color}", Game.PLAYERS.get(player.getUniqueId()).color.getColorString());
@@ -146,5 +161,14 @@ public final class PlayerListener implements Listener {
             event.setDeathMessage(apply(player, message.getString("playerDie.last"), map));
         }
         Game.playerDie(player);
+    }
+    @EventHandler
+    public void playerCraftItem(CraftItemEvent event) {
+        event.setCancelled(true);
+    }
+
+    public static void init() {
+        firstBlood = true;
+        PLAYER_DAMAGE.clear();
     }
 }

@@ -4,6 +4,7 @@ import cf.jerryzrf.bedwarsx.Config;
 import cf.jerryzrf.bedwarsx.Utils;
 import cf.jerryzrf.bedwarsx.api.Event.GameStatusChangeEvent;
 import cf.jerryzrf.bedwarsx.api.Game.GameStatus;
+import cf.jerryzrf.bedwarsx.listener.PlayerListener;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
@@ -41,7 +42,7 @@ public final class Game {
     public static final Set<UUID> REJOIN_PLAYERS = new HashSet<>();
     public static final Map<Entity, UUID> ANIMALS = new HashMap<>();
     public static final Location CENTRE = new Location(WORLD, config.getInt("watcher.loc.x"), config.getInt("watcher.loc.y"), config.getInt("watcher.loc.z"));
-    public static final Map<UUID, Long> noHurtTime = new HashMap<>();
+    public static final Map<UUID, Long> NO_HURT_TIME = new HashMap<>();
 
     public static void start() {
         changeStatus(GameStatus.Running);
@@ -50,7 +51,7 @@ public final class Game {
         int n = IN_GAME_PLAYERS.size() / TeamManager.TEAMS.size() + (IN_GAME_PLAYERS.size() % TeamManager.TEAMS.size() == 0 ? 0 : 1);
         Random random = new Random();
         IN_GAME_PLAYERS.forEach(player -> {
-            noHurtTime.put(player.getUniqueId(), 0L);
+            NO_HURT_TIME.put(player.getUniqueId(), 0L);
             TeamManager.Team team;
             do {
                 team = TeamManager.TEAMS.get(random.nextInt(TeamManager.TEAMS.size()));
@@ -83,6 +84,7 @@ public final class Game {
     }
 
     public static void init() {
+        PlayerListener.init();
         WORLD.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
         Bukkit.getOnlinePlayers().forEach(player -> player.kick(Component.text("服务器重置")));
         changeStatus(GameStatus.Waiting);
@@ -120,7 +122,7 @@ public final class Game {
                 end(team);
             }
         } else {
-            Map<String, String> map = new HashMap<>();
+            Map<String, String> map = new HashMap<>(2, 1f);
             map.put("{color}", PLAYERS.get(player.getUniqueId()).color.getColorString());
             new BukkitRunnable() {
                 @Override
@@ -140,10 +142,11 @@ public final class Game {
                     new BukkitRunnable() {
                         @Override
                         public void run() {
+                            player.teleport(PLAYERS.get(player.getUniqueId()).spawn);
                             player.setGameMode(GameMode.SURVIVAL);
                         }
                     }.runTask(plugin);
-                    noHurtTime.put(player.getUniqueId(), (new Date()).getTime());
+                    NO_HURT_TIME.put(player.getUniqueId(), Utils.getTime());
                     player.clearTitle();
                     player.showTitle(Title.title(
                             Component.text(apply(player, message.getString("respawnTitle0", "你复活了"), map)),

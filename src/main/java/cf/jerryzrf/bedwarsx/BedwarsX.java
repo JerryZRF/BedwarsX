@@ -45,13 +45,13 @@ public final class BedwarsX extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
         saveDefaultConfig();
-        Bukkit.getPluginManager().registerEvents(new BlockListener(), this);
-        Bukkit.getPluginManager().registerEvents(new GameModeListener(), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         Config.loadMainConfig();
         Config.loadMessage();
         ResourceManager.load();
         TeamManager.load();
+        Bukkit.getPluginManager().registerEvents(new BlockListener(), this);
+        Bukkit.getPluginManager().registerEvents(new GameModeListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         Bukkit.getPluginCommand("bwx").setExecutor(new Commander());
         Bukkit.getPluginCommand("bwx").setTabCompleter(new Commander());
         Game.init();

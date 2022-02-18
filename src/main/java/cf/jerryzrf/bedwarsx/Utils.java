@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -102,5 +103,13 @@ public final class Utils {
             }
         }));
         return players;
+    }
+
+    static final Date DATE = new Date();
+    /**
+     * 获取当前时间
+     */
+    public static long getTime() {
+        return DATE.getTime();
     }
 }
