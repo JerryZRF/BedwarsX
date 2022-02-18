@@ -5,7 +5,6 @@ import cf.jerryzrf.bedwarsx.Utils;
 import cf.jerryzrf.bedwarsx.api.Game.GameStatus;
 import cf.jerryzrf.bedwarsx.game.Damage;
 import cf.jerryzrf.bedwarsx.game.Game;
-import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Player;
@@ -43,16 +42,17 @@ public final class PlayerListener implements Listener {
             if (Game.REJOIN_PLAYERS.contains(player.getUniqueId())) {
                 player.setDisplayName(Game.PLAYERS.get(player.getUniqueId()).color.getColorString() + "[" + Game.PLAYERS.get(player.getUniqueId()).name + "]" + player.getDisplayName());
                 Game.IN_GAME_PLAYERS.add(player);
-                //TODO 添加到语言文件
-                event.setJoinMessage(player.getDisplayName() + "断线重连");
+                event.setJoinMessage(apply(player, message.getString("rejoin"), Map.of(
+                        "{team_color}", Game.PLAYERS.get(player.getUniqueId()).color.getColorString(),
+                        "{player}", player.getDisplayName()
+                )));
             } else {
                 player.setGameMode(GameMode.SPECTATOR);
                 Game.PLAYERS.put(player.getUniqueId(), Game.WATCHER);
             }
         } else if (Game.status == GameStatus.Editing) {
             if (!player.hasPermission("bwx.edit")) {
-                //TODO 添加到语言文件
-                player.kick(Component.text("服务器正在施工，请稍后再试..."));
+                player.kickPlayer(apply(player, message.getString("edit")));
             }
         }
         player.clearTitle();
@@ -67,15 +67,16 @@ public final class PlayerListener implements Listener {
         Player player = event.getPlayer();
         Game.IN_GAME_PLAYERS.remove(player);
         Game.PLAYERS.remove(player.getUniqueId());
+        Map<String, String> map = new HashMap<>(2, 1f);
+        map.put("{team_color}", Game.PLAYERS.get(player.getUniqueId()).color.getColorString());
         if (Game.status == GameStatus.Running) {
             Game.REJOIN_PLAYERS.add(player.getUniqueId());
             Game.IN_GAME_PLAYERS.remove(player);
-            //TODO 添加至语言文件
-            event.quitMessage(Component.text(player.getDisplayName() + "退出了游戏，但他仍能断线重连"));
-            return;
+            map.put("{player}", player.getDisplayName());
+            event.setQuitMessage(apply(player, message.getString("quit.game"), map));
+        } else if (Game.status == GameStatus.Waiting) {
+            event.setQuitMessage(apply(player, message.getString("quit.cd"), map));
         }
-        //TODO 添加至语言文件
-        event.quitMessage(Component.text(player.getDisplayName() + "退出了游戏"));
     }
     @EventHandler
     public void playerChat(AsyncPlayerChatEvent event) {

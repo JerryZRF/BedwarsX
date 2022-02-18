@@ -84,8 +84,8 @@ public final class TeamManager {
         PINK,
         //灰色
         GREY,
-        LIGHT_GRAY,
         //浅灰色
+        LIGHT_GRAY,
         //青色
         CYAN,
         //紫色
@@ -100,7 +100,6 @@ public final class TeamManager {
         RED,
         //黑色
         BLACK;
-
         public ChatColor getChatColor() {
             return ChatColor.valueOf(name());
         }
